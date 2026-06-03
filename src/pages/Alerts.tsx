@@ -12,8 +12,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Bell, CheckCircle2, Filter, Plus, CheckCheck, User, UserCheck, X, Clock, AlertTriangle } from 'lucide-react';
+import { Bell, CheckCircle2, Filter, Plus, CheckCheck, User, UserCheck, X, Clock } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
+import { api } from '@/lib/api';
 import type { Alert } from '@/data/mockData';
 
 const alertTypeBadge: Record<string, string> = {
@@ -45,37 +46,32 @@ export default function Alerts() {
   const isAr = language === 'ar';
 
   // ─── إنشاء تنبيهات تلقائية للحالات المتأخرة ──────────
-  // نستخدم beneficiaries و sessions فقط كـ dependency — مش alerts — لمنع الـ loop
+  // نتحقق من Supabase مباشرة لمنع التكرار
   useEffect(() => {
     if (!beneficiaries.length || !sessions.length) return;
 
-    const today   = new Date();
-    const DAYS_30 = 30 * 24 * 60 * 60 * 1000;
+    const today = new Date();
 
-    beneficiaries.forEach(b => {
-      if (b.caseStatus !== 'active') return;
+    const processAlerts = async () => {
+      for (const b of beneficiaries) {
+        if (b.caseStatus !== 'active') continue;
 
-      // آخر جلسة لهذه الحالة
-      const benSessions = sessions
-        .filter(s => s.beneficiaryId === b.id)
-        .sort((a, c) => c.serviceDate.localeCompare(a.serviceDate));
+        const benSessions = sessions
+          .filter(s => s.beneficiaryId === b.id)
+          .sort((a, c) => c.serviceDate.localeCompare(a.serviceDate));
 
-      const lastSession = benSessions[0];
-      if (!lastSession) return;
+        const lastSession = benSessions[0];
+        if (!lastSession) continue;
 
-      const lastDate  = new Date(lastSession.serviceDate);
-      const diffMs    = today.getTime() - lastDate.getTime();
-      const diffDays  = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        const diffMs   = today.getTime() - new Date(lastSession.serviceDate).getTime();
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-      // تحقق إذا فيه تنبيه متأخر موجود مسبقاً وغير محلول
-      const existingAlert = alerts.find(
-        a => a.beneficiaryId === b.id &&
-             a.alertType === 'follow_up_needed' &&
-             !a.isResolved &&
-             a.alertMessage?.includes('يوم')
-      );
+        if (diffDays < 30) continue;
 
-      if (diffDays >= 30 && !existingAlert) {
+        // تحقق من Supabase مباشرة — يمنع التكرار
+        const exists = await api.checkAutoAlert(b.id);
+        if (exists) continue;
+
         const newAlert: Alert = {
           id: `auto_followup_${b.id}_${Date.now()}`,
           beneficiaryId: b.id,
@@ -87,9 +83,11 @@ export default function Alerts() {
           createdBy: 'system',
           createdByName: 'النظام (تلقائي)',
         };
-        addAlert(newAlert);
+        await addAlert(newAlert);
       }
-    });
+    };
+
+    processAlerts();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [beneficiaries.length, sessions.length]);
 
@@ -190,8 +188,7 @@ export default function Alerts() {
     return true;
   });
 
-  // إحصاء الحالات المتأخرة
-  const today   = new Date();
+  const today = new Date();
   const lateCount = beneficiaries.filter(b => {
     if (b.caseStatus !== 'active') return false;
     const benSessions = sessions.filter(s => s.beneficiaryId === b.id);
