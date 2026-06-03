@@ -60,9 +60,10 @@ export default function Reports() {
   const maleCount    = filteredBeneficiaries.filter(b => b.gender === 'male').length;
   const femaleCount  = filteredBeneficiaries.filter(b => b.gender === 'female').length;
   const improvedCount = filteredSessions.filter(s => s.sessionResponse === 'تحسن ملحوظ' || s.sessionResponse === 'تحسن بسيط').length;
-  const improvementRate = filteredSessions.length > 0
-    ? ((improvedCount / filteredSessions.length) * 100).toFixed(1)
-    : '0';
+  const sessionsWithResponse = filteredSessions.filter(s => s.sessionResponse && s.sessionResponse.trim() !== '').length;
+const improvementRate = sessionsWithResponse > 0
+  ? ((improvedCount / sessionsWithResponse) * 100).toFixed(1)
+  : '0';
 
   const serviceData = [
     { name: 'علاج طبيعي', count: physioCount },
