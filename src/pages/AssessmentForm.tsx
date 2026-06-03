@@ -147,7 +147,7 @@ function calcSdqScores(a: number[]) {
   const r = (i: number) => (a[i] >= 0 ? 2 - a[i] : -1); // reversed
   const s = (i: number) => (a[i] >= 0 ? a[i] : 0);
   const emotional    = [s(2),s(7),s(12),s(15),s(23)].reduce((x,y)=>x+y,0);
-  const conduct      = [s(4),r(6) >= 0 ? r(6) : 0,s(11),s(17),s(21)].reduce((x,y)=>x+y,0);
+  const conduct = [s(4), r(6) >= 0 ? r(6) : 0, s(11), s(17), r(21) >= 0 ? r(21) : 0].reduce((x,y)=>x+y,0);
   const hyperact     = [s(1),s(9),s(14),r(20) >= 0 ? r(20) : 0,r(24) >= 0 ? r(24) : 0].reduce((x,y)=>x+y,0);
   const peer         = [s(5),r(10) >= 0 ? r(10) : 0,r(13) >= 0 ? r(13) : 0,s(18),s(22)].reduce((x,y)=>x+y,0);
   const prosocial    = [s(0),s(3),s(8),s(16),s(19)].reduce((x,y)=>x+y,0);
