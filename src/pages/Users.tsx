@@ -159,18 +159,25 @@ export default function Users() {
   };
 
   const handleDelete = async () => {
-    if (!deleteDialog) return;
-    setDeleteLoading(true);
-    try {
-      await deleteUser(deleteDialog.id, deleteWithData);
-      toast({ title: `تم حذف ${deleteDialog.fullName}` + (deleteWithData ? ' وجميع بياناته' : '') });
-      setDeleteDialog(null);
-    } catch {
-      toast({ title: 'فشل الحذف', variant: 'destructive' });
-    } finally {
-      setDeleteLoading(false);
+  if (!deleteDialog) return;
+  setDeleteLoading(true);
+  try {
+    if (deleteWithData) {
+      // حذف حقيقي — يحذف السجل كاملاً
+      await deleteUser(deleteDialog.id);
+      toast({ title: `تم حذف ${deleteDialog.fullName} نهائياً` });
+    } else {
+      // تعطيل مؤقت — البيانات تبقى
+      await updateUser({ ...deleteDialog, status: 'inactive' });
+      toast({ title: `تم تعطيل حساب ${deleteDialog.fullName}` });
     }
-  };
+    setDeleteDialog(null);
+  } catch {
+    toast({ title: 'فشلت العملية', variant: 'destructive' });
+  } finally {
+    setDeleteLoading(false);
+  }
+};
 
   const handleRoleChange = (role: Role) => setForm(f => ({ ...f, role, permissions: {} }));
   const toggleProject = (proj: string) => setForm(f => ({ ...f, projects: f.projects.includes(proj) ? f.projects.filter(p => p !== proj) : [...f.projects, proj] }));
