@@ -343,7 +343,9 @@ export async function loginWithEdgeFunction(username: string, password: string) 
   const { data, error } = await supabase.functions.invoke('hyper-action', {
     body: { username, password }
   });
-  if (error || !data?.user) throw new Error('فشل تسجيل الدخول');
+  if (error) throw new Error('فشل تسجيل الدخول');
+if (data?.error) throw new Error(data.error);
+if (!data?.user) throw new Error('فشل تسجيل الدخول');
   return { token: data.token, user: data.user };
 }
 
