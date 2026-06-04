@@ -331,6 +331,13 @@ export async function getMaintenanceStatus(): Promise<{ enabled: boolean; messag
   }
 }
 
+export async function setMaintenanceStatus(enabled: boolean, message: string): Promise<void> {
+  await supabase.from('settings').upsert([
+    { key: 'maintenance_mode',    value: String(enabled), updated_at: new Date().toISOString() },
+    { key: 'maintenance_message', value: message,         updated_at: new Date().toISOString() },
+  ]);
+}
+
 export async function loginWithEdgeFunction(username: string, password: string) {
   const { data, error } = await supabase.functions.invoke('hyper-action', {
     body: { username, password }
