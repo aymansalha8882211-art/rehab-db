@@ -30,9 +30,12 @@ export default function Login() {
 
   const onSubmit = async (data: FormData) => {
     setError('');
-    const success = await login(data.username, data.password);
-    if (success) {
+    const result = await login(data.username, data.password);
+    if (result === true) {
       setLocation('/search');
+    } else if (typeof result === 'string') {
+      // رسالة خطأ محددة من الـ server (مثل: حساب معطّل)
+      setError(result);
     } else {
       setError(language === 'ar' ? 'اسم المستخدم أو كلمة المرور غير صحيحة' : 'Invalid username or password');
     }

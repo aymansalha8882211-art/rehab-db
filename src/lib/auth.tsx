@@ -5,8 +5,6 @@ import { encryptedDb } from './encryptedDb';
 import { loginWithEdgeFunction, setToken, clearToken } from './api';
 import { supabase } from './supabaseClient';
 
-
-
 const TIMEOUT_KEY  = 'rehab-session-timeout';
 const USER_KEY     = 'rehab-current-user';
 const PIN_KEY      = 'rehab-pin-hash';
@@ -21,7 +19,6 @@ function hashPin(pin: string): string {
   return String(h >>> 0);
 }
 
-// ─── Permission Helper ────────────────────────────────────────────────────────
 export function resolvePermissions(user: User | null): UserPermissions {
   if (!user) return DEFAULT_PERMISSIONS['viewer'];
   const base = { ...DEFAULT_PERMISSIONS[user.role] };
@@ -33,7 +30,7 @@ export function resolvePermissions(user: User | null): UserPermissions {
 
 interface AuthContextType {
   currentUser: User | null;
-  login:  (username: string, password: string) => Promise<boolean>;
+  login:  (username: string, password: string) => Promise<boolean | string>;
   logout: () => void;
   isAuthenticated: boolean;
   sessionTimeoutMins: number | 'never';
@@ -79,9 +76,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const permissions = resolvePermissions(currentUser);
 
-  // ─── تحديث بيانات المستخدم من Supabase ───────────────
-  // كل 30 ثانية يسأل Supabase عن بيانات المستخدم الحالي
-  // لو تغيّرت الصلاحيات أو الدور → يحدّث تلقائياً بدون logout
   const refreshCurrentUser = useCallback(async (userId: string) => {
     try {
       const { data, error } = await supabase
@@ -103,7 +97,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         permissions: data.permissions || undefined,
       };
 
-      // لو تغيّر الدور أو الصلاحيات أو الحالة → حدّث
       const current = currentUser;
       if (
         current &&
@@ -114,7 +107,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           JSON.stringify(current.permissions) !== JSON.stringify(updatedUser.permissions)
         )
       ) {
-        // لو صار inactive → اطرده
         if (updatedUser.status === 'inactive') {
           doLogout();
           return;
@@ -140,14 +132,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     db.users.toArray().then(u => { if (u.length > 0) setDbUsers(u as User[]); });
   }, []);
 
-  // فحص دوري كل 30 ثانية لتحديث صلاحيات المستخدم
   useEffect(() => {
     if (!currentUser) return;
-
     const interval = setInterval(() => {
       refreshCurrentUser(currentUser.id);
     }, 30_000);
-
     return () => clearInterval(interval);
   }, [currentUser?.id, refreshCurrentUser]);
 
@@ -201,42 +190,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [currentUser, timeoutMins]);
 
   // ─── Login ────────────────────────────────────────────────────────────────
-  const login = async (username: string, password: string): Promise<boolean> => {
+  const login = async (username: string, password: string): Promise<boolean | string> => {
     try {
-      const { token, user } = await loginWithEdgeFunction(username, password);
+      const result = await loginWithEdgeFunction(username, password);
+      const { token, user } = result;
       setToken(token);
       const fullUser = user as unknown as User;
       setCurrentUser(fullUser);
       localStorage.setItem(USER_KEY, JSON.stringify(fullUser));
       encryptedDb.init(password);
-
-      try {
-        const syncData = await api.syncPull();
-        if (syncData.beneficiaries.length === 0) {
-          const [localBens, localSessions, localAlerts, localUsers] = await Promise.all([
-            db.beneficiaries.toArray(),
-            db.sessions.toArray(),
-            db.alerts.toArray(),
-            db.users.toArray(),
-          ]);
-          if (localBens.length > 0 || localSessions.length > 0) {
-            await api.syncPush({ beneficiaries: localBens, sessions: localSessions, alerts: localAlerts, users: localUsers });
-          }
-        } else {
-          await db.transaction('rw', db.beneficiaries, db.sessions, db.users, db.alerts, async () => {
-            await db.beneficiaries.clear();
-            await db.beneficiaries.bulkPut(syncData.beneficiaries as Beneficiary[]);
-            await db.sessions.clear();
-            await db.sessions.bulkPut(syncData.sessions as Session[]);
-            await db.users.clear();
-            await db.users.bulkPut(syncData.users as User[]);
-            await db.alerts.clear();
-            await db.alerts.bulkPut(syncData.alerts as Alert[]);
-          });
-        }
-      } catch {}
       return true;
-    } catch {}
+    } catch (err: any) {
+      // لو الحساب معطّل — أرجع الرسالة مباشرة
+      const msg = err?.message || '';
+      if (msg.includes('معطّل') || msg.includes('مدير النظام')) {
+        return msg;
+      }
+    }
 
     // Fallback: local Dexie
     const localUsers = await db.users.toArray();
