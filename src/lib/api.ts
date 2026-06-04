@@ -331,21 +331,23 @@ export async function getMaintenanceStatus(): Promise<{ enabled: boolean; messag
   }
 }
 
-export async function setMaintenanceStatus(enabled: boolean, message: string): Promise<void> {
-  await supabase.from('settings').upsert([
-    { key: 'maintenance_mode',    value: String(enabled), updated_at: new Date().toISOString() },
-    { key: 'maintenance_message', value: message,         updated_at: new Date().toISOString() },
-  ]);
-}
-
-// ─── Login via Edge Function ──────────────────────────────
 export async function loginWithEdgeFunction(username: string, password: string) {
   const { data, error } = await supabase.functions.invoke('hyper-action', {
     body: { username, password }
   });
-  if (error) throw new Error('فشل تسجيل الدخول');
-if (data?.error) throw new Error(data.error);
-if (!data?.user) throw new Error('فشل تسجيل الدخول');
+  
+  // لو فيه error من الشبكة
+  if (error) {
+    // حاول تقرأ الرسالة من الـ context
+    const msg = (error as any)?.context?.error || (error as any)?.message || '';
+    if (msg) throw new Error(msg);
+    throw new Error('فشل تسجيل الدخول');
+  }
+  
+  // لو الـ response فيه error (403 معطّل)
+  if (data?.error) throw new Error(data.error);
+  if (!data?.user) throw new Error('فشل تسجيل الدخول');
+  
   return { token: data.token, user: data.user };
 }
 
