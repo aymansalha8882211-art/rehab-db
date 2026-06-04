@@ -340,7 +340,7 @@ export async function setMaintenanceStatus(enabled: boolean, message: string): P
 
 // ─── Login via Edge Function ──────────────────────────────
 export async function loginWithEdgeFunction(username: string, password: string) {
-  const { data, error } = await supabase.functions.invoke('login', {
+  const { data, error } = await supabase.functions.invoke('hyper-action', {
     body: { username, password }
   });
   if (error || !data?.user) throw new Error('فشل تسجيل الدخول');
