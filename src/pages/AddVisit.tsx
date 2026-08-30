@@ -25,7 +25,7 @@ import {
   FAMILY_COOPERATION, INJURY_TYPES,
   CBM_SERVICE_TYPES, CHURCH_SERVICE_TYPES,
   AGE_CLASSIFICATIONS, WOUND_STATUS, NURSING_INTERVENTIONS,
-  PHYSIO_ASSESSMENT, CHURCH_NEXT_SESSION_SERVICES, Session,
+  PHYSIO_ASSESSMENT, CHURCH_NEXT_SESSION_SERVICES, Session, getProject
 } from '@/data/mockData';
 
 // ─── "أخرى" textbox helper ────────────────────────────────────────────────────
@@ -925,8 +925,9 @@ export default function AddVisit() {
     );
   }
 
-  const projectLabel = beneficiary?.project === 'Church' ? 'Church – Rehabilitation' : 'CBM';
-  const projectColor = beneficiary?.project === 'Church' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700';
+  const projectDef   = getProject(beneficiary?.project);
+  const projectLabel = projectDef.label;
+  const projectColor = projectDef.badgeClass;
 
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-5" dir="rtl">
@@ -966,7 +967,7 @@ export default function AddVisit() {
         </div>
       )}
 
-      {beneficiary?.project === 'Church'
+      {projectDef.forms === 'church'
         ? <ChurchForm beneficiaryId={beneficiaryId || ''} allowedServiceTypes={allowedTypes} />
         : <CbmForm beneficiaryId={beneficiaryId || ''} prevCount={prevSessions.length} allowedServiceTypes={allowedTypes} />
       }

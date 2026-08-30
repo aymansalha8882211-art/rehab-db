@@ -9,7 +9,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search as SearchIcon, UserPlus, AlertCircle, Clock, ChevronRight, Filter, X, AlertTriangle, ExternalLink } from 'lucide-react';
-import { GAZA_AREAS } from '@/data/mockData';
+import { GAZA_AREAS, PROJECT_CODES
+} from '@/data/mockData';
 
 const PAGE_SIZE = 20;
 
@@ -150,7 +151,7 @@ export default function Search() {
   );
 
   const availableProjects = isAdmin || userProjects.length === 0
-    ? ['CBM', 'Church']
+    ? PROJECT_CODES
     : userProjects;
 
   // ─── Pagination Component ─────────────────────────────────────────────────

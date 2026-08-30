@@ -16,7 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, UserPlus, AlertTriangle, CheckCircle2, ExternalLink } from 'lucide-react';
 import {
-  GAZA_AREAS, INJURY_TYPES, BENEFICIARY_CLASSIFICATIONS, Beneficiary
+  GAZA_AREAS, INJURY_TYPES, BENEFICIARY_CLASSIFICATIONS, Beneficiary, PROJECTS, PROJECT_CODES
 } from '@/data/mockData';
 
 const schema = z.object({
@@ -33,7 +33,7 @@ const schema = z.object({
   caregiverName:         z.string().min(2, 'اسم الوصي مطلوب'),
   injuryType:            z.string().min(1, 'نوع الإصابة مطلوب'),
   disabilityDescription: z.string().optional(),
-  project:               z.enum(['CBM', 'Church']),
+  project:               z.enum(PROJECT_CODES),
   generalNotes:          z.string().optional(),
 });
 
@@ -265,8 +265,9 @@ export default function NewBeneficiary() {
                   <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="CBM">CBM</SelectItem>
-                      <SelectItem value="Church">Church</SelectItem>
+                      {PROJECTS.map(p => (
+                        <SelectItem key={p.code} value={p.code}>{p.label}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 )} />

@@ -1,5 +1,32 @@
 export type Role = 'admin' | 'supervisor' | 'data_entry' | 'viewer' | 'nursing' | 'psychology' | 'physiotherapy';
-export type ProjectCode = 'CBM' | 'Church';
+// ─── Project registry ────────────────────────────────────────────────────────
+// One entry per project. `forms` decides which session form and which
+// assessment variant the project uses, so a new project inherits a whole
+// workflow instead of needing its own branch in every page that renders it.
+//
+// To add a project: add a line here. Nothing else in the UI is hardcoded to a
+// project name any more -- dropdowns, filters, charts and role assignment all
+// read this list.
+export interface ProjectDef {
+  readonly code: string;
+  readonly label: string;
+  readonly badgeClass: string;
+  readonly forms: 'cbm' | 'church';
+}
+
+export const PROJECTS = [
+  { code: 'CBM',    label: 'CBM',                     badgeClass: 'bg-blue-100 text-blue-700',       forms: 'cbm'    },
+  { code: 'Church', label: 'Church – Rehabilitation', badgeClass: 'bg-emerald-100 text-emerald-700', forms: 'church' },
+] as const satisfies readonly ProjectDef[];
+
+export type ProjectCode = typeof PROJECTS[number]['code'];
+
+export const PROJECT_CODES = PROJECTS.map(p => p.code) as [ProjectCode, ...ProjectCode[]];
+
+/** Falls back to the first project so an unknown code renders rather than crashing. */
+export function getProject(code: string | undefined | null) {
+  return PROJECTS.find(p => p.code === code) ?? PROJECTS[0];
+}
 export type Gender = 'male' | 'female';
 export type CaseStatus = 'open' | 'active' | 'closed' | 'inactive';
 export type AlertType = 'follow_up_needed' | 'device_needed' | 'missing_data';

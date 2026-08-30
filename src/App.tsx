@@ -26,6 +26,9 @@ import NotFound from "@/pages/not-found";
 import { Wrench } from "lucide-react";
 import { getMaintenanceStatus } from "@/lib/api";
 import AssessmentForm from '@/pages/AssessmentForm';
+import SuccessStories from '@/pages/SuccessStories';
+import MissedVisits from '@/pages/MissedVisits';
+import Import from '@/pages/Import';
 
 const queryClient = new QueryClient();
 
@@ -142,6 +145,9 @@ function AppRoutes() {
       <Route path="/staff-performance"><Protected C={StaffPerformance} supervisorPlus /></Route>
       <Route path="/settings"><Protected C={Settings} /></Route>
       <Route path="/assessment/:id"><Protected C={AssessmentForm} /></Route>
+      <Route path="/success-stories"><Protected C={SuccessStories} supervisorPlus /></Route>
+      <Route path="/missed-visits"><Protected C={MissedVisits} /></Route>
+      <Route path="/import"><Protected C={Import} adminOnly /></Route>
       <Route component={NotFound} />
       
     </Switch>
