@@ -11,12 +11,21 @@ export interface ProjectDef {
   readonly code: string;
   readonly label: string;
   readonly badgeClass: string;
+  /**
+   * Which form set the project uses. Every project is on 'cbm' today; 'church'
+   * stays supported because sessions recorded under the old Church form are
+   * still in the database and still have to render.
+   */
   readonly forms: 'cbm' | 'church';
+  /** Inline CSS for printed reports, which render outside Tailwind. */
+  readonly printStyle: string;
 }
 
 export const PROJECTS = [
-  { code: 'CBM',    label: 'CBM',                     badgeClass: 'bg-blue-100 text-blue-700',       forms: 'cbm'    },
-  { code: 'Church', label: 'Church – Rehabilitation', badgeClass: 'bg-emerald-100 text-emerald-700', forms: 'church' },
+  { code: 'CBM',    label: 'CBM',                     badgeClass: 'bg-blue-100 text-blue-700',       forms: 'cbm'   , printStyle: 'background:#dbeafe;color:#1e40af' },
+  { code: 'Church', label: 'Church – Rehabilitation', badgeClass: 'bg-emerald-100 text-emerald-700', forms: 'cbm'   , printStyle: 'background:#d1fae5;color:#065f46' },
+  { code: 'HelpAge', label: 'Help Age',                 badgeClass: 'bg-amber-100 text-amber-700',     forms: 'cbm'   , printStyle: 'background:#fef3c7;color:#92400e' },
+  { code: 'Caritas', label: 'Caritas',                  badgeClass: 'bg-purple-100 text-purple-700',   forms: 'cbm'   , printStyle: 'background:#f3e8ff;color:#6b21a8' },
 ] as const satisfies readonly ProjectDef[];
 
 export type ProjectCode = typeof PROJECTS[number]['code'];
@@ -575,7 +584,7 @@ export interface Alert {
 export interface Assessment {
   id: string;
   beneficiaryId: string;
-  project: 'CBM' | 'Church';
+  project: ProjectCode;
   assessmentDate: string;
   sessionNumber?: string;
   photoConsent?: boolean;

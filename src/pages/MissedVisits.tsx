@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
 import * as XLSX from 'xlsx';
 import { UserX, Search, MapPin, Phone, Calendar, FileDown, AlertTriangle, Clock } from 'lucide-react';
-import { GAZA_AREAS } from '@/data/mockData';
+import { GAZA_AREAS, getProject} from '@/data/mockData';
 
 const THRESHOLD_DAYS = 30;
 
@@ -185,7 +185,7 @@ export default function MissedVisits() {
                       <Link href={`/beneficiary/${r.id}`} className="font-semibold text-sm hover:text-primary hover:underline">
                         {r.fullName}
                       </Link>
-                      <Badge className={`text-[10px] border-0 ${r.project === 'CBM' ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                      <Badge className={`text-[10px] border-0 ${getProject(r.project).badgeClass}`}>
                         {r.project}
                       </Badge>
                       <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${priorityColor(r.daysSince)}`}>

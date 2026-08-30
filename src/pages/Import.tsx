@@ -17,8 +17,7 @@ import {
 import { useLocation } from 'wouter';
 import {
   GAZA_AREAS, INJURY_TYPES, BENEFICIARY_CLASSIFICATIONS,
-  Beneficiary
-} from '@/data/mockData';
+  Beneficiary, PROJECTS} from '@/data/mockData';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type ImportMode = 'beneficiaries';
@@ -185,7 +184,10 @@ export default function Import() {
       caregiverName:    get('caregiverName').trim() || '—',
       injuryType:       get('injuryType').trim() as any,
       classification:   get('classification').trim() as any,
-      project:          (get('project').trim() === 'Church' ? 'Church' : 'CBM') as 'CBM' | 'Church',
+      // Matches on code or display label, so a sheet saying "Help Age" lands on
+      // HelpAge. Anything unrecognised falls back to the first project rather
+      // than importing a project that does not exist.
+      project:          (PROJECTS.find(p => p.code === get('project').trim() || p.label === get('project').trim())?.code ?? PROJECTS[0].code),
       hasDisability:    parseBoolean(get('hasDisability')),
       disabilityDescription: get('disabilityDescription').trim(),
       generalNotes:     get('generalNotes').trim(),

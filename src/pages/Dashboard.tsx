@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { GAZA_AREAS } from '@/data/mockData';
+import { GAZA_AREAS, PROJECTS, getProject} from '@/data/mockData';
 
 const COLORS = ['hsl(215,100%,35%)', 'hsl(160,60%,45%)', 'hsl(30,90%,55%)', 'hsl(340,75%,55%)', 'hsl(270,60%,55%)'];
 
@@ -80,10 +80,10 @@ export default function Dashboard() {
     { name: 'ذكر',  value: beneficiaries.filter(b=>b.gender==='male').length },
     { name: 'أنثى', value: beneficiaries.filter(b=>b.gender==='female').length },
   ];
-  const projectData = [
-    { name: 'CBM',    value: beneficiaries.filter(b=>b.project==='CBM').length },
-    { name: 'Church', value: beneficiaries.filter(b=>b.project==='Church').length },
-  ];
+  const projectData = PROJECTS.map(p => ({
+    name: p.label,
+    value: beneficiaries.filter(b => b.project === p.code).length,
+  }));
   const serviceData = [
     { name:'علاج طبيعي', count:physioCount },{ name:'علاج وظيفي', count:otCount },
     { name:'تمريض', count:nursingCount },{ name:'دعم نفسي', count:psychCount },{ name:'توجيه أسري', count:familyCount },
@@ -167,7 +167,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 flex-shrink-0">
-                    <Badge className={`text-[10px] border-0 ${b.project==='Church'?'bg-emerald-100 text-emerald-700':'bg-blue-100 text-blue-700'}`}>{b.project}</Badge>
+                    <Badge className={`text-[10px] border-0 ${getProject(b.project).badgeClass}`}>{b.project}</Badge>
                     <Badge className={`text-[10px] border-0 ${b.caseStatus==='active'?'bg-green-100 text-green-700':'bg-gray-100 text-gray-600'}`}>{b.caseStatus==='active'?'نشط':'مغلق'}</Badge>
                     <ExternalLink className="w-3.5 h-3.5 text-muted-foreground"/>
                   </div>

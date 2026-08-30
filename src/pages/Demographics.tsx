@@ -7,7 +7,7 @@ import {
 } from 'recharts';
 import { Users, MapPin, Activity, HeartPulse, FileDown, Printer } from 'lucide-react';
 import * as XLSX from 'xlsx';
-import { GAZA_AREAS } from '@/data/mockData';
+import { GAZA_AREAS, PROJECTS } from '@/data/mockData';
 
 const PIE_COLORS  = ['hsl(215,100%,40%)', 'hsl(340,75%,55%)', 'hsl(160,60%,40%)', 'hsl(30,90%,55%)', 'hsl(270,60%,50%)', 'hsl(50,80%,50%)'];
 const AREA_COLOR  = 'hsl(215,100%,40%)';
@@ -67,10 +67,9 @@ export default function Demographics() {
         'جلسات': sessions.filter(s => s.serviceArea === area).length,
       }))
     ), 'التوزيع الجغرافي');
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([
-      { 'المشروع': 'CBM',    'العدد': beneficiaries.filter(b => b.project === 'CBM').length },
-      { 'المشروع': 'Church', 'العدد': beneficiaries.filter(b => b.project === 'Church').length },
-    ]), 'المشاريع');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(
+      PROJECTS.map(p => ({ 'المشروع': p.label, 'العدد': beneficiaries.filter(b => b.project === p.code).length }))
+    ), 'المشاريع');
     XLSX.writeFile(wb, `الديموغرافيا_${new Date().toLocaleDateString('ar')}.xlsx`);
   };
 
@@ -122,10 +121,10 @@ export default function Demographics() {
     }));
   }, [beneficiaries, sessions]);
 
-  const projectData = useMemo(() => [
-    { name: 'CBM',   value: beneficiaries.filter(b => b.project === 'CBM').length },
-    { name: 'Church',value: beneficiaries.filter(b => b.project === 'Church').length },
-  ], [beneficiaries]);
+  const projectData = useMemo(() => PROJECTS.map(p => ({
+    name: p.label,
+    value: beneficiaries.filter(b => b.project === p.code).length,
+  })), [beneficiaries]);
 
   const disabilityData = useMemo(() => [
     { name: 'يوجد إعاقة',   value: beneficiaries.filter(b => b.hasDisability).length },

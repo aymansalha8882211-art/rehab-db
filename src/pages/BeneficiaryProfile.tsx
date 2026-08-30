@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import SDQTab from '@/components/SDQTab';
 import AssessmentsTab from '@/components/AssessmentsTab';
-import { Session, GAZA_AREAS, INJURY_TYPES, BENEFICIARY_CLASSIFICATIONS, CBM_SERVICE_TYPES, CHURCH_SERVICE_TYPES } from '@/data/mockData';
+import { Session, GAZA_AREAS, INJURY_TYPES, BENEFICIARY_CLASSIFICATIONS, CBM_SERVICE_TYPES, CHURCH_SERVICE_TYPES, getProject} from '@/data/mockData';
 import AttachmentsTab from '@/components/AttachmentsTab';
 import {
   ArrowLeft, Plus, Phone, MapPin, Calendar, User, Stethoscope,
@@ -289,7 +289,7 @@ td{padding:5px 8px;border-bottom:1px solid #e8edf5}tr:nth-child(even) td{backgro
 .footer{margin-top:30px;border-top:1px solid #ccc;padding-top:10px;font-size:8pt;color:#888;display:flex;justify-content:space-between}
 @media print{@page{margin:0;size:A4 portrait}body{padding:1cm 1.5cm}}</style></head><body>
 <h1>نظام إدارة حالات إعادة التأهيل</h1>
-<p class="sub">${beneficiary.project==='CBM'?'مشروع CBM':'مشروع الكنيسة'} — ملف المستفيد</p>
+<p class="sub">مشروع ${getProject(beneficiary.project).label} — ملف المستفيد</p>
 <p class="meta">تاريخ الطباعة: ${now} | طُبع بواسطة: ${currentUser?.fullName||'—'}</p>
 <h2>البيانات الأساسية</h2><div>
 ${[['الاسم الرباعي',beneficiary.fullName],['رقم الهوية',beneficiary.nationalId],['الجنس',beneficiary.gender==='male'?'ذكر':'أنثى'],['تاريخ الميلاد',beneficiary.dateOfBirth],['تاريخ الإصابة',beneficiary.injuryDate],['منطقة السكن',beneficiary.residenceArea],['نوع الإصابة',beneficiary.injuryType],['التصنيف',beneficiary.classification],['اسم الوصي',beneficiary.caregiverName],['رقم الجوال',beneficiary.phone],['المشروع',beneficiary.project],['تاريخ التسجيل',beneficiary.registrationDate],['الحالة',beneficiary.caseStatus==='active'?'نشط':'مغلق']].map(([l,v])=>`<div class="info-row"><span class="info-lbl">${l}</span><span class="info-val">${v||'—'}</span></div>`).join('')}
@@ -488,7 +488,7 @@ ${lastSdq ? `- آخر SDQ: ${lastSdq.sdqTotal}` : ''}
     }));
     myAssessments.forEach(a => events.push({
       id:a.id, date:a.assessmentDate, type:'assessment', title:'تقييم شامل',
-      subtitle: a.groups?.join(' + ') || (a.project==='CBM'?'CBM':'Church'),
+      subtitle: a.groups?.join(' + ') || getProject(a.project).label,
       gad: a.gadTotal, pain: a.painPresent ? a.painScore : undefined,
       meta: a.sdqTotal !== undefined ? `SDQ: ${a.sdqTotal}` : undefined,
     }));
@@ -523,7 +523,7 @@ ${lastSdq ? `- آخر SDQ: ${lastSdq.sdqTotal}` : ''}
             <h1 className="text-lg md:text-xl font-bold leading-snug break-words">{beneficiary.fullName}</h1>
             <div className="flex flex-wrap items-center gap-1.5 mt-1">
               <Badge className={`border-0 text-xs ${beneficiary.caseStatus==='active'?'bg-green-100 text-green-700':'bg-gray-100 text-gray-600'}`}>{beneficiary.caseStatus==='active'?'نشط':'مغلق'}</Badge>
-              <Badge className={`border-0 text-xs ${beneficiary.project==='Church'?'bg-emerald-100 text-emerald-700':'bg-blue-100 text-blue-700'}`}>{beneficiary.project}</Badge>
+              <Badge className={`border-0 text-xs ${getProject(beneficiary.project).badgeClass}`}>{beneficiary.project}</Badge>
             </div>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1.5 text-xs text-muted-foreground">
               <span className="flex items-center gap-1"><User className="w-3 h-3"/>{beneficiary.nationalId}</span>
@@ -607,7 +607,7 @@ ${lastSdq ? `- آخر SDQ: ${lastSdq.sdqTotal}` : ''}
           <TabsTrigger value="physio"      className="text-xs rounded-lg">علاج طبيعي {(physioSessions.length+otSessions.length)>0&&<span className="ms-1 bg-primary/20 text-primary rounded-full text-[10px] px-1.5">{physioSessions.length+otSessions.length}</span>}</TabsTrigger>
           <TabsTrigger value="nursing"     className="text-xs rounded-lg">تمريض {nursingSessions.length>0&&<span className="ms-1 bg-primary/20 text-primary rounded-full text-[10px] px-1.5">{nursingSessions.length}</span>}</TabsTrigger>
           <TabsTrigger value="psych"       className="text-xs rounded-lg">دعم نفسي {psychSessions.length>0&&<span className="ms-1 bg-primary/20 text-primary rounded-full text-[10px] px-1.5">{psychSessions.length}</span>}</TabsTrigger>
-          {beneficiary.project==='CBM'&&<TabsTrigger value="family" className="text-xs rounded-lg">توجيه أسري {familySessions.length>0&&<span className="ms-1 bg-primary/20 text-primary rounded-full text-[10px] px-1.5">{familySessions.length}</span>}</TabsTrigger>}
+          {getProject(beneficiary.project).forms==='cbm'&&<TabsTrigger value="family" className="text-xs rounded-lg">توجيه أسري {familySessions.length>0&&<span className="ms-1 bg-primary/20 text-primary rounded-full text-[10px] px-1.5">{familySessions.length}</span>}</TabsTrigger>}
           <TabsTrigger value="devices"     className="text-xs rounded-lg">الأدوات</TabsTrigger>
           <TabsTrigger value="ai"          className="text-xs rounded-lg">🤖 تحليل AI</TabsTrigger>
           <TabsTrigger value="attachments" className="text-xs rounded-lg">📎 المرفقات</TabsTrigger>
@@ -966,7 +966,7 @@ ${lastSdq ? `- آخر SDQ: ${lastSdq.sdqTotal}` : ''}
         <div style={{direction:'rtl',fontFamily:"'Noto Sans Arabic', Arial, sans-serif",color:'#000',fontSize:'11pt',lineHeight:1.7}}>
           <div style={{textAlign:'center',borderBottom:'2px solid #1a3a6b',paddingBottom:'14px',marginBottom:'20px'}}>
             <h1 style={{fontSize:'17pt',fontWeight:'bold',color:'#1a3a6b',margin:0}}>نظام إدارة حالات إعادة التأهيل</h1>
-            <p style={{fontSize:'10pt',color:'#555',margin:'4px 0 0'}}>{beneficiary.project==='CBM'?'مشروع CBM':'مشروع الكنيسة'} — وثيقة سرية للاستخدام الرسمي فقط</p>
+            <p style={{fontSize:'10pt',color:'#555',margin:'4px 0 0'}}>مشروع {getProject(beneficiary.project).label} — وثيقة سرية للاستخدام الرسمي فقط</p>
             <p style={{fontSize:'9pt',color:'#888',margin:'2px 0 0'}}>تاريخ الطباعة: {new Date().toLocaleDateString('ar-EG',{year:'numeric',month:'long',day:'numeric'})}</p>
           </div>
           {sessions.length>0&&(

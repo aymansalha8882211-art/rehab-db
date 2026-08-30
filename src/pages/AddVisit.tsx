@@ -25,7 +25,7 @@ import {
   FAMILY_COOPERATION, INJURY_TYPES,
   CBM_SERVICE_TYPES, CHURCH_SERVICE_TYPES,
   AGE_CLASSIFICATIONS, WOUND_STATUS, NURSING_INTERVENTIONS,
-  PHYSIO_ASSESSMENT, CHURCH_NEXT_SESSION_SERVICES, Session, getProject
+  PHYSIO_ASSESSMENT, CHURCH_NEXT_SESSION_SERVICES, Session, getProject, type ProjectDef
 } from '@/data/mockData';
 
 // ─── "أخرى" textbox helper ────────────────────────────────────────────────────
@@ -967,7 +967,7 @@ export default function AddVisit() {
         </div>
       )}
 
-      {projectDef.forms === 'church'
+      {(projectDef.forms as ProjectDef['forms']) === 'church'
         ? <ChurchForm beneficiaryId={beneficiaryId || ''} allowedServiceTypes={allowedTypes} />
         : <CbmForm beneficiaryId={beneficiaryId || ''} prevCount={prevSessions.length} allowedServiceTypes={allowedTypes} />
       }
