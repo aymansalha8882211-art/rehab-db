@@ -231,7 +231,7 @@ export default function Users() {
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">@{user.username}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5" dir="ltr">@{user.username}</p>
                   <div className="flex gap-1 mt-1">
                     {user.projects.map(p => <Badge key={p} variant="outline" className="text-xs h-5">{p}</Badge>)}
                   </div>

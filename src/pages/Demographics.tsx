@@ -178,7 +178,7 @@ export default function Demographics() {
 
         <Card>
           <CardHeader className="pb-3"><CardTitle className="text-sm">توزيع الجنس</CardTitle></CardHeader>
-          <CardContent className="flex items-center justify-center">
+          <CardContent>
             <ResponsiveContainer width="100%" height={220}>
               <PieChart>
                 <Pie data={genderData} cx="50%" cy="50%" outerRadius={85} dataKey="value" label={renderLabel}>
@@ -195,7 +195,7 @@ export default function Demographics() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card>
           <CardHeader className="pb-3"><CardTitle className="text-sm">توزيع المشروع</CardTitle></CardHeader>
-          <CardContent className="flex items-center justify-center">
+          <CardContent>
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
                 <Pie data={projectData} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={renderLabel}>
@@ -209,7 +209,7 @@ export default function Demographics() {
 
         <Card>
           <CardHeader className="pb-3"><CardTitle className="text-sm">حالة القضايا</CardTitle></CardHeader>
-          <CardContent className="flex items-center justify-center">
+          <CardContent>
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
                 <Pie data={statusData} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={renderLabel}>
@@ -265,7 +265,7 @@ export default function Demographics() {
       {/* Disability */}
       <Card>
         <CardHeader className="pb-3"><CardTitle className="text-sm">توزيع الإعاقة</CardTitle></CardHeader>
-        <CardContent className="flex items-center justify-center">
+        <CardContent>
           <ResponsiveContainer width="100%" height={180}>
             <PieChart>
               <Pie data={disabilityData} cx="50%" cy="50%" outerRadius={70} dataKey="value" label={renderLabel}>

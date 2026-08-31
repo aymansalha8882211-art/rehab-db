@@ -31,6 +31,8 @@ interface DataContextType {
   auditLogs:         AuditLog[];
   isLoading:         boolean;
   isOnline:          boolean;
+  /** Browser is connected AND the API answered. False = nothing is reaching the server. */
+  backendReachable:  boolean;
   lastSyncAt:        string | null;
   pendingCount:      number;
   addBeneficiary:    (b: Beneficiary) => Promise<void>;
@@ -62,6 +64,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [auditLogs,     setAuditLogs]     = useState<AuditLog[]>([]);
   const [isLoading,     setIsLoading]     = useState(true);
   const [isOnline,      setIsOnline]      = useState(navigator.onLine);
+  const [backendReachable, setBackendReachable] = useState(true);
   const [lastSyncAt,    setLastSyncAt]    = useState<string | null>(null);
   const [pendingCount,  setPendingCount]  = useState(() => loadQueue().length);
 
@@ -146,11 +149,16 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         ]);
         setBeneficiaries(bens); setSessions(sess); setUsers(usrs); setAlerts(alts);
         setLastSyncAt(new Date().toLocaleTimeString('ar'));
+        setBackendReachable(true);
         await cacheInDexie(bens, sess, usrs, alts);
         const logs = await db.auditLogs.orderBy('timestamp').reverse().limit(500).toArray();
         setAuditLogs(logs as AuditLog[]);
       } else { await loadFromDexie(); }
-    } catch (err) { console.error('Error loading data:', err); await loadFromDexie(); }
+    } catch (err) {
+      console.error('Error loading data:', err);
+      setBackendReachable(false);
+      await loadFromDexie();
+    }
     finally { setIsLoading(false); }
   }, [flushQueue]);
 
@@ -163,8 +171,9 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       ]);
       setBeneficiaries(bens); setSessions(sess); setUsers(usrs); setAlerts(alts);
       setLastSyncAt(new Date().toLocaleTimeString('ar'));
+      setBackendReachable(true);
       await cacheInDexie(bens, sess, usrs, alts);
-    } catch (e) { console.error('Sync error:', e); }
+    } catch (e) { console.error('Sync error:', e); setBackendReachable(false); }
   }, []);
 
   const addAuditLog = async (log: Omit<AuditLog, 'id'>) => {
@@ -284,7 +293,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   return (
     <DataContext.Provider value={{
       beneficiaries, sessions, users, alerts, assessments, auditLogs,
-      isLoading, isOnline, lastSyncAt, pendingCount,
+      isLoading, isOnline, backendReachable, lastSyncAt, pendingCount,
       addBeneficiary, updateBeneficiary, deleteBeneficiary,
       addSession, updateSession, deleteSession,
       addUser, updateUser, deleteUser,

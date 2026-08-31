@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import {
   LayoutDashboard, Search, BarChart2, Bell, Users, Settings,
   LogOut, Menu, X, Globe, Shield, Eye, Edit2, User, Wifi, WifiOff,
-  ClipboardList, ArrowRightLeft, PieChart, Users2, Sparkles, CalendarX2, Upload,
+  ClipboardList, ArrowRightLeft, PieChart, Users2, Sparkles, CalendarX2, Upload, AlertTriangle,
 } from 'lucide-react';
 
 const navItems = [
@@ -36,7 +36,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const { currentUser, logout } = useAuth();
   const { t, language, setLanguage } = useLanguage();
-  const { alerts } = useData();
+  const { alerts, backendReachable, pendingCount } = useData();
 
   const unresolvedAlerts = alerts.filter(a => !a.isResolved).length;
   const myAssignedAlerts = alerts.filter(a => !a.isResolved && a.assignedToUserId === currentUser?.id).length;
@@ -125,13 +125,32 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Online status */}
-        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs ${isOnline ? 'text-green-600' : 'text-red-500'}`}>
-          {isOnline ? <Wifi className="w-3.5 h-3.5" /> : <WifiOff className="w-3.5 h-3.5" />}
-          <span>{isOnline
-            ? (language === 'ar' ? 'متصل بالإنترنت' : 'Online')
-            : (language === 'ar' ? 'وضع عدم الاتصال' : 'Offline')}
-          </span>
-        </div>
+        {!isOnline ? (
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-red-500">
+            <WifiOff className="w-3.5 h-3.5" />
+            <span>{language === 'ar' ? 'وضع عدم الاتصال' : 'Offline'}</span>
+          </div>
+        ) : !backendReachable ? (
+          <div className="flex items-start gap-2 px-3 py-1.5 rounded-lg text-xs bg-red-50 text-red-600">
+            <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="font-medium">{language === 'ar' ? 'الخادم غير متاح' : 'Server unreachable'}</p>
+              <p className="mt-0.5">{language === 'ar'
+                ? 'ما يُدخَل الآن محفوظ على هذا الجهاز فقط ولم يصل إلى الخادم.'
+                : 'Entries are saved on this device only and have not reached the server.'}</p>
+              {pendingCount > 0 && (
+                <p className="mt-0.5 font-medium">{language === 'ar'
+                  ? `${pendingCount} سجل في انتظار المزامنة`
+                  : `${pendingCount} record(s) awaiting sync`}</p>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-green-600">
+            <Wifi className="w-3.5 h-3.5" />
+            <span>{language === 'ar' ? 'متصل ومتزامن' : 'Online and synced'}</span>
+          </div>
+        )}
 
         {/* Language toggle */}
         <button

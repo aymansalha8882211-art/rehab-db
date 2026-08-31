@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
-import { mockUsers, User, Beneficiary, Session, Alert, UserPermissions, DEFAULT_PERMISSIONS } from '@/data/mockData';
+import { User, Beneficiary, Session, Alert, UserPermissions, DEFAULT_PERMISSIONS } from '@/data/mockData';
 import { db } from './db';
 import { encryptedDb } from './encryptedDb';
 import { loginWithEdgeFunction, setToken, clearToken } from './api';
@@ -58,7 +58,6 @@ const AuthContext = createContext<AuthContextType>({
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [dbUsers, setDbUsers]         = useState<User[]>(mockUsers as User[]);
   const [timeoutMins, setTimeoutMins] = useState<number | 'never'>(() => {
     const saved = localStorage.getItem(TIMEOUT_KEY);
     if (!saved) return DEFAULT_MINS;
@@ -125,7 +124,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         encryptedDb.init(`${u.username}:${u.id}`);
       } catch {}
     }
-    db.users.toArray().then(u => { if (u.length > 0) setDbUsers(u as User[]); });
   }, []);
 
   useEffect(() => {
@@ -204,10 +202,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    // Fallback: local Dexie
-    const localUsers = await db.users.toArray();
-    const pool = localUsers.length > 0 ? localUsers as User[] : dbUsers;
-    const user = pool.find(u => u.username === username && u.password === password && u.status === 'active');
+    // Offline fallback, limited to users cached by a previous successful
+    // server login. It never falls back to the bundled demo accounts: those
+    // ship inside the public JS, so anyone reading the page source could have
+    // signed in as an administrator.
+    const localUsers = await db.users.toArray() as User[];
+    if (localUsers.length === 0) {
+      return 'تعذّر الاتصال بالخادم، ولا توجد بيانات دخول محفوظة على هذا الجهاز.';
+    }
+    const user = localUsers.find(u => u.username === username && u.password === password && u.status === 'active');
     if (user) {
       setCurrentUser(user);
       localStorage.setItem(USER_KEY, JSON.stringify(user));

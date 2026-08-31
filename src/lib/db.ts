@@ -1,6 +1,5 @@
 import Dexie, { type Table } from 'dexie';
 import type { Beneficiary, Session, User, Alert, Attachment } from '@/data/mockData';
-import { mockBeneficiaries, mockSessions, mockUsers, mockAlerts } from '@/data/mockData';
 
 export interface AuditLog {
   id: string;
@@ -73,14 +72,6 @@ export class RehabDB extends Dexie {
 
 export const db = new RehabDB();
 
-db.on('ready', async () => {
-  const count = await db.beneficiaries.count();
-  if (count === 0) {
-    await db.transaction('rw', db.beneficiaries, db.sessions, db.users, db.alerts, async () => {
-      await db.beneficiaries.bulkAdd(mockBeneficiaries as Beneficiary[]);
-      await db.sessions.bulkAdd(mockSessions as Session[]);
-      await db.users.bulkAdd(mockUsers as User[]);
-      await db.alerts.bulkAdd(mockAlerts as Alert[]);
-    });
-  }
-});
+// Deliberately not seeded. Demo records are indistinguishable from real ones
+// once they are on screen, so seeding turned a backend outage into a system
+// that looked like it was working and holding six real cases.
