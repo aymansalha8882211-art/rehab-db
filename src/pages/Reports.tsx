@@ -19,7 +19,7 @@ export default function Reports() {
   const { language }    = useLanguage();
   const { toast }       = useToast();
   const { currentUser } = useAuth();
-  const { beneficiaries, sessions, logAction } = useData();
+  const { beneficiaries, sessions } = useData();
   const [pdfLoading,   setPdfLoading]   = useState(false);
   const [donorLoading, setDonorLoading] = useState(false);
 

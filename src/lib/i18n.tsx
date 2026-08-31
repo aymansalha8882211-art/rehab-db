@@ -51,7 +51,6 @@ const translations = {
     "Download": "Download",
     "Upload": "Upload",
     "View": "View",
-    "Open": "Open",
 
     // Common fields
     "Name": "Name",
@@ -173,7 +172,6 @@ const translations = {
     "Trauma level assessment": "Trauma level assessment",
     "Psych intervention provided": "Psychological intervention provided",
     "Special notes brief assessment": "Special notes / brief assessment",
-    "Family guidance topic": "Family guidance session topic",
     "If individual write 1": "If individual, write 1",
     "If improvement type": "If improvement occurred — type of improvement",
     "Sessions team commits to": "Number of sessions the team commits to",
@@ -638,7 +636,6 @@ const translations = {
     "Download": "تحميل",
     "Upload": "رفع",
     "View": "عرض",
-    "Open": "فتح",
 
     // Common fields
     "Name": "الاسم",
@@ -760,7 +757,6 @@ const translations = {
     "Trauma level assessment": "تقييم مستوى الصدمة",
     "Psych intervention provided": "التدخل النفسي المقدم",
     "Special notes brief assessment": "ملاحظات خاصة / تقييم مختصر",
-    "Family guidance topic": "موضوع جلسة التوجيه الأسري",
     "If individual write 1": "إذا كان فرداً اكتب 1",
     "If improvement type": "إذا حدث تحسن — نوع التحسن",
     "Sessions team commits to": "عدد الجلسات التي سيلتزم الفريق بتنفيذها",

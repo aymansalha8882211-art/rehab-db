@@ -28,10 +28,7 @@ jobs:
       - name: Build
         run: npm run build
 
-      # Not a gate yet. The project carries 32 pre-existing type errors, so
-      # failing on them would block every pull request from day one. This
-      # records the count so the number can be driven down deliberately
-      # instead of drifting upward unnoticed.
-      - name: Typecheck (reported, not enforced)
-        continue-on-error: true
+      # Enforced. The tree is clean, so anything that lands here has to stay
+      # that way rather than adding to a backlog nobody reads.
+      - name: Typecheck
         run: npm run typecheck

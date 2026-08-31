@@ -171,7 +171,9 @@ function mapAssessment(row: any): Assessment {
     planOfTreatment: row.plan_of_treatment,
     improvementSinceLast: row.improvement_since_last,
     improvementSinceLastPss: row.improvement_since_last_pss,
-    dischargeDate: row.discharge_date,
+    dischargeDatePhisp: row.discharge_date_phisp,
+    dischargeDatePss: row.discharge_date_pss,
+    dischargeDateChurch: row.discharge_date_church,
     notes: row.notes,
     signature: row.signature,
     createdBy: row.created_by,
@@ -310,7 +312,10 @@ function assessmentToRow(a: Assessment) {
     plan_of_treatment: a.planOfTreatment,
     improvement_since_last: a.improvementSinceLast,
     improvement_since_last_pss: a.improvementSinceLastPss,
-    discharge_date: a.dischargeDate, notes: a.notes, signature: a.signature,
+    discharge_date_phisp: a.dischargeDatePhisp,
+    discharge_date_pss: a.dischargeDatePss,
+    discharge_date_church: a.dischargeDateChurch,
+    notes: a.notes, signature: a.signature,
     created_by: a.createdBy, created_at: a.createdAt,
   };
 }

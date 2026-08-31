@@ -68,7 +68,10 @@ export default function NewBeneficiary() {
       return;
     }
     const newId  = 'b' + Date.now();
-    const newBen: Beneficiary = {
+    // zodResolver's inferred submit type marks every field optional, even the
+    // ones the schema requires, so the spread does not satisfy Beneficiary on
+    // its own. Validation has already run by this point: the fields are there.
+    const newBen = {
       id: newId, ...data,
       alternativePhone:      data.alternativePhone || '',
       disabilityDescription: data.disabilityDescription || '',
@@ -80,7 +83,7 @@ export default function NewBeneficiary() {
       registrationDate: new Date().toISOString().split('T')[0],
       createdBy: currentUser?.id || '',
       createdAt: new Date().toISOString().split('T')[0],
-    };
+    } as Beneficiary;
     await addBeneficiary(newBen);
     toast({ title: 'تم تسجيل الحالة بنجاح' });
     setLocation(`/beneficiary/${newId}`);

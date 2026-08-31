@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { User, Role, DEFAULT_PERMISSIONS, UserPermissions, ROLE_LABELS, PROJECTS
+import { User, Role, DEFAULT_PERMISSIONS, UserPermissions, ROLE_LABELS, type ProjectCode, PROJECTS
 } from '@/data/mockData';
 import { useToast } from '@/hooks/use-toast';
 import { UserPlus, Pencil, Shield, Eye, Edit2, User as UserIcon, Settings2, Trash2, Send, Copy, AlertTriangle } from 'lucide-react';
@@ -123,7 +123,7 @@ export default function Users() {
   const [form, setForm] = useState({
     fullName: '', username: '', password: '',
     role: 'data_entry' as Role,
-    projects: [] as string[],
+    projects: [] as ProjectCode[],
     status: 'active' as User['status'],
     permissions: {} as Partial<UserPermissions>,
     assignedStaff: [] as string[],
@@ -136,7 +136,7 @@ export default function Users() {
 
   const openAdd = () => {
     setEditing(null); setActiveTab('info');
-    setForm({ fullName: '', username: '', password: '', role: 'data_entry', projects: [], status: 'active', permissions: {} });
+    setForm({ fullName: '', username: '', password: '', role: 'data_entry', projects: [], status: 'active', permissions: {}, assignedStaff: [] });
     setOpen(true);
   };
 
@@ -181,7 +181,7 @@ export default function Users() {
 };
 
   const handleRoleChange = (role: Role) => setForm(f => ({ ...f, role, permissions: {} }));
-  const toggleProject = (proj: string) => setForm(f => ({ ...f, projects: f.projects.includes(proj) ? f.projects.filter(p => p !== proj) : [...f.projects, proj] }));
+  const toggleProject = (proj: ProjectCode) => setForm(f => ({ ...f, projects: f.projects.includes(proj) ? f.projects.filter(p => p !== proj) : [...f.projects, proj] }));
 
   const getCredentialsText = (user: User) =>
     `مرحباً ${user.fullName} 👋\n\nبيانات دخولك إلى نظام إعادة التأهيل:\n🌐 الرابط: ${SITE_URL}\n👤 اسم المستخدم: ${user.username}\n🔑 كلمة المرور: ${user.password}\n\nيُرجى تغيير كلمة المرور بعد أول دخول من الإعدادات.`;

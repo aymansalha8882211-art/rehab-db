@@ -203,7 +203,8 @@ function AssessmentCard({ a, index }: { a: Assessment; index: number }) {
                   <Tags label="خطة العلاج"              items={a.planOfTreatment} />
                   <Row label="التحسن (علاج طبيعي)"      value={a.improvementSinceLast} />
                   <Row label="التحسن (نفسي)"             value={a.improvementSinceLastPss} />
-                  <Row label="تاريخ الخروج"              value={a.dischargeDate} />
+                  <Row label="تاريخ الخروج (علاج طبيعي)" value={a.dischargeDatePhisp} />
+                  <Row label="تاريخ الخروج (دعم نفسي)"   value={a.dischargeDatePss} />
                   <Row label="ملاحظات"                   value={a.notes} />
                   <Tags label="توقيع الفريق"             items={a.signature} />
                 </div>

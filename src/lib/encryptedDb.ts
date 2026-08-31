@@ -106,18 +106,18 @@ export const encryptedDb = {
 
   async getBeneficiaries(): Promise<Beneficiary[]> {
     const raw = await db.beneficiaries.toArray();
-    return decryptAll(raw as Record<string, unknown>[]) as Promise<Beneficiary[]>;
+    return decryptAll(raw as unknown as Record<string, unknown>[]) as unknown as Promise<Beneficiary[]>;
   },
 
   async getBeneficiary(id: string): Promise<Beneficiary | undefined> {
     const raw = await db.beneficiaries.get(id);
     if (!raw) return undefined;
-    return decryptRecord(raw as Record<string, unknown>) as Promise<Beneficiary>;
+    return decryptRecord(raw as unknown as Record<string, unknown>) as unknown as Promise<Beneficiary>;
   },
 
   async putBeneficiary(ben: Beneficiary): Promise<void> {
-    const enc = await encryptRecord(ben as Record<string, unknown>, BEN_PLAIN);
-    await db.beneficiaries.put(enc as Beneficiary);
+    const enc = await encryptRecord(ben as unknown as Record<string, unknown>, BEN_PLAIN);
+    await db.beneficiaries.put(enc as unknown as Beneficiary);
   },
 
   async deleteBeneficiary(id: string): Promise<void> {
@@ -128,17 +128,17 @@ export const encryptedDb = {
 
   async getSessions(): Promise<Session[]> {
     const raw = await db.sessions.toArray();
-    return decryptAll(raw as Record<string, unknown>[]) as Promise<Session[]>;
+    return decryptAll(raw as unknown as Record<string, unknown>[]) as unknown as Promise<Session[]>;
   },
 
   async getSessionsByBeneficiary(beneficiaryId: string): Promise<Session[]> {
     const raw = await db.sessions.where('beneficiaryId').equals(beneficiaryId).toArray();
-    return decryptAll(raw as Record<string, unknown>[]) as Promise<Session[]>;
+    return decryptAll(raw as unknown as Record<string, unknown>[]) as unknown as Promise<Session[]>;
   },
 
   async putSession(session: Session): Promise<void> {
-    const enc = await encryptRecord(session as Record<string, unknown>, SES_PLAIN);
-    await db.sessions.put(enc as Session);
+    const enc = await encryptRecord(session as unknown as Record<string, unknown>, SES_PLAIN);
+    await db.sessions.put(enc as unknown as Session);
   },
 
   async deleteSession(id: string): Promise<void> {
@@ -149,12 +149,12 @@ export const encryptedDb = {
 
   async getAlerts(): Promise<Alert[]> {
     const raw = await db.alerts.toArray();
-    return decryptAll(raw as Record<string, unknown>[]) as Promise<Alert[]>;
+    return decryptAll(raw as unknown as Record<string, unknown>[]) as unknown as Promise<Alert[]>;
   },
 
   async putAlert(alert: Alert): Promise<void> {
-    const enc = await encryptRecord(alert as Record<string, unknown>, ALRT_PLAIN);
-    await db.alerts.put(enc as Alert);
+    const enc = await encryptRecord(alert as unknown as Record<string, unknown>, ALRT_PLAIN);
+    await db.alerts.put(enc as unknown as Alert);
   },
 
   async deleteAlert(id: string): Promise<void> {
@@ -165,12 +165,12 @@ export const encryptedDb = {
 
   async getUsers(): Promise<User[]> {
     const raw = await db.users.toArray();
-    return decryptAll(raw as Record<string, unknown>[]) as Promise<User[]>;
+    return decryptAll(raw as unknown as Record<string, unknown>[]) as unknown as Promise<User[]>;
   },
 
   async putUser(user: User): Promise<void> {
-    const enc = await encryptRecord(user as Record<string, unknown>, USR_PLAIN);
-    await db.users.put(enc as User);
+    const enc = await encryptRecord(user as unknown as Record<string, unknown>, USR_PLAIN);
+    await db.users.put(enc as unknown as User);
   },
 
   // ── Bulk re-encrypt (call after password change) ───────────────────────────
