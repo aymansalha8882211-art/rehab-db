@@ -81,12 +81,24 @@ ${lastSessions || 'لا توجد جلسات'}
 }`;
   };
 
+  // Generating a summary means sending a beneficiary's clinical history to a
+  // model provider. That request has to be signed with an API key, and a key
+  // shipped to the browser is a public key -- so this needs a server endpoint
+  // to sign it. There is no server yet, so the feature is switched off here
+  // rather than left as a button that fails every time and blames the network.
+  const AI_SUMMARY_ENABLED = false;
+
   const generateSummary = async () => {
     setLoading(true);
     setError(null);
     setSummary(null);
 
     try {
+      if (!AI_SUMMARY_ENABLED) {
+        throw new Error(isAr
+          ? 'ميزة الملخص الذكي غير مُفعَّلة بعد — تحتاج إعداداً على الخادم.'
+          : 'AI summary is not enabled yet: it needs a server-side endpoint.');
+      }
       const response = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -111,7 +123,7 @@ ${lastSessions || 'لا توجد جلسات'}
       setGenerated(new Date().toLocaleString('ar-EG'));
     } catch (err) {
       console.error('AI summary error:', err);
-      setError(isAr ? 'فشل توليد الملخص. تأكد من الاتصال بالإنترنت وحاول مجدداً.' : 'Failed to generate summary. Check your connection and try again.');
+      setError(err instanceof Error ? err.message : (isAr ? 'فشل توليد الملخص.' : 'Failed to generate summary.'));
     } finally {
       setLoading(false);
     }

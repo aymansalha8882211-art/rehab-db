@@ -134,9 +134,9 @@ export default function Settings() {
     setPinFirst(pinInput); setPinInput(''); setPinError(''); setPinStep('confirm');
   };
 
-  const handlePinConfirm = () => {
+  const handlePinConfirm = async () => {
     if (pinInput !== pinFirst) { setPinError(isAr ? 'الرمزان غير متطابقين' : 'PINs do not match'); setPinInput(''); return; }
-    setupPin(pinInput); setPinStep('idle'); setPinInput(''); setPinFirst(''); setPinError('');
+    await setupPin(pinInput); setPinStep('idle'); setPinInput(''); setPinFirst(''); setPinError('');
     toast({ title: isAr ? 'تم تفعيل قفل PIN ✓' : 'PIN lock enabled ✓' });
   };
 

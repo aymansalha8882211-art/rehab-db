@@ -30,7 +30,7 @@ export default function PinLock() {
     setPin(next);
     setError(false);
     if (next.length === 4) {
-      setTimeout(() => tryUnlock(next), 80);
+      setTimeout(() => { void tryUnlock(next); }, 80);
     }
   };
 
@@ -39,8 +39,9 @@ export default function PinLock() {
     setError(false);
   };
 
-  const tryUnlock = (p: string) => {
-    const ok = unlockWithPin(p);
+  const tryUnlock = async (p: string) => {
+    // Verification stretches the PIN deliberately, so it takes a moment.
+    const ok = await unlockWithPin(p);
     if (!ok) {
       setAttempts(a => a + 1);
       setError(true);
@@ -75,7 +76,7 @@ export default function PinLock() {
           const val = e.target.value.replace(/\D/g, '').slice(0, 4);
           setPin(val);
           setError(false);
-          if (val.length === 4) setTimeout(() => tryUnlock(val), 80);
+          if (val.length === 4) setTimeout(() => { void tryUnlock(val); }, 80);
         }}
       />
 

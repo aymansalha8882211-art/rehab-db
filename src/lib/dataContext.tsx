@@ -11,7 +11,17 @@ type QueueAction = 'addBeneficiary' | 'updateBeneficiary' | 'deleteBeneficiary'
                  | 'addAlert'       | 'resolveAlert'
                  | 'addAssessment';
 
-interface QueueItem { id: string; action: QueueAction; payload: any; }
+interface QueueItem {
+  id: string;
+  action: QueueAction;
+  payload: any;
+  /** Failed attempts. An item that keeps failing is a data problem, not a network one. */
+  attempts?: number;
+  lastError?: string;
+}
+
+/** After this many failures an item is reported instead of retried in silence. */
+const MAX_ATTEMPTS = 5;
 
 const QUEUE_KEY = 'rehab-offline-queue';
 function loadQueue(): QueueItem[] { try { return JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]'); } catch { return []; } }
@@ -78,7 +88,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     if (q.length === 0) return;
     isSyncing.current = true;
     const succeeded: string[] = [];
+    const failed = new Map<string, string>();
     for (const item of q) {
+      // A record that has failed this often will not start working on the next
+      // pass. Leave it queued so it can be looked at, and move on -- it used to
+      // sit at the head of the queue and block everything behind it.
+      if ((item.attempts ?? 0) >= MAX_ATTEMPTS) continue;
       try {
         switch (item.action) {
           case 'addBeneficiary':    await api.addBeneficiary(item.payload);    break;
@@ -95,15 +110,36 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           case 'addAssessment':     await api.addAssessment(item.payload);     break;
         }
         succeeded.push(item.id);
-      } catch (e) { console.warn('Queue flush error:', e); break; }
+      } catch (e) {
+        console.warn('Queue flush error:', e);
+        failed.set(item.id, e instanceof Error ? e.message : String(e));
+        // The connection dropping mid-run says nothing about the remaining
+        // items, and hammering them would only burn battery. Anything else is
+        // this record's own problem, so skip it and keep going.
+        if (!navigator.onLine) break;
+      }
     }
+
+    const remaining = loadQueue()
+      .filter(i => !succeeded.includes(i.id))
+      .map(i => failed.has(i.id)
+        ? { ...i, attempts: (i.attempts ?? 0) + 1, lastError: failed.get(i.id) }
+        : i);
+    saveQueue(remaining);
+    refreshPendingCount();
+
+    const stuck = remaining.filter(i => (i.attempts ?? 0) >= MAX_ATTEMPTS).length;
     if (succeeded.length > 0) {
-      const remaining = loadQueue().filter(i => !succeeded.includes(i.id));
-      saveQueue(remaining);
-      refreshPendingCount();
       toast({
         title: `✅ تمت مزامنة ${succeeded.length} ${succeeded.length === 1 ? 'سجل' : 'سجلات'} بنجاح`,
         description: remaining.length > 0 ? `تبقّى ${remaining.length} في الانتظار` : 'جميع البيانات محفوظة على السيرفر',
+      });
+    }
+    if (stuck > 0) {
+      toast({
+        variant: 'destructive',
+        title: `${stuck} ${stuck === 1 ? 'سجل' : 'سجلات'} تعذّرت مزامنتها`,
+        description: 'حاول النظام مراراً دون نجاح. يرجى إبلاغ مدير النظام قبل مسح بيانات المتصفح.',
       });
     }
     isSyncing.current = false;

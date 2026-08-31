@@ -17,8 +17,7 @@ import type { Attachment, AttachmentCategory } from '@/data/mockData';
 import type { Session } from '@/data/mockData';
 import {
   Paperclip, Upload, Trash2, Download, Image, FileText,
-  File, Eye, X, Camera, Loader2,
-} from 'lucide-react';
+  File, Eye, X, Camera, Loader2, AlertTriangle} from 'lucide-react';
 
 interface Props {
   beneficiaryId: string;
@@ -173,6 +172,18 @@ export default function AttachmentsTab({ beneficiaryId, sessions, language, canU
 
   return (
     <div className="space-y-4">
+      {/* Attachments never leave the device that uploaded them: they are stored
+          as base64 in this browser's IndexedDB and no upload endpoint exists.
+          A colleague opening the same case sees nothing, and clearing browser
+          data destroys them. Saying so is the honest thing to do until there
+          is somewhere real to put them. */}
+      <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800">
+        <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+        <span>{isAr
+          ? 'الملفات محفوظة على هذا الجهاز فقط ولا تصل إلى الخادم. لن يراها زميل آخر، وتُفقد إذا مُسحت بيانات المتصفح. احتفظ بنسخة أصلية خارج النظام.'
+          : 'Files are stored on this device only and never reach the server. Colleagues cannot see them, and clearing browser data destroys them. Keep an original copy elsewhere.'}</span>
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>

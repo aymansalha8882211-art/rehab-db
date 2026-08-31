@@ -15,13 +15,40 @@ const PIN_KEY      = 'rehab-pin-hash';
 const PIN_LOCK_KEY = 'rehab-pin-locked';
 const DEFAULT_MINS = 30;
 
-function hashPin(pin: string): string {
-  let h = 0;
-  for (let i = 0; i < pin.length; i++) {
-    h = (Math.imul(31, h) + pin.charCodeAt(i)) | 0;
-  }
-  return String(h >>> 0);
+const PIN_SALT_KEY = 'rehab-pin-salt';
+const PIN_ITERATIONS = 200_000;
+
+/**
+ * A PIN is four to six digits, so the whole keyspace is at most a million
+ * guesses. The previous hash was a 32-bit multiply-and-add over the digits,
+ * which a script reverses instantly from the value sitting in localStorage.
+ * Stretching with PBKDF2 does not make the keyspace bigger, but it puts a
+ * real cost on each guess: unlocking takes a fraction of a second, walking
+ * the space takes hours.
+ */
+async function hashPin(pin: string, salt: BufferSource): Promise<string> {
+  const key = await crypto.subtle.importKey(
+    'raw', new TextEncoder().encode(pin), 'PBKDF2', false, ['deriveBits'],
+  );
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt, iterations: PIN_ITERATIONS, hash: 'SHA-256' }, key, 256,
+  );
+  return btoa(String.fromCharCode(...new Uint8Array(bits)));
 }
+
+function newSalt() {
+  return crypto.getRandomValues(new Uint8Array(16));
+}
+
+const saltToB64 = (s: Uint8Array) => btoa(String.fromCharCode(...s));
+const saltFromB64 = (b: string) => {
+  // Built by filling a fresh array rather than Uint8Array.from, whose return
+  // type is not accepted as a BufferSource by the Web Crypto definitions.
+  const bin = atob(b);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+};
 
 
 interface AuthContextType {
@@ -33,9 +60,9 @@ interface AuthContextType {
   setSessionTimeoutMins: (v: number | 'never') => void;
   pinEnabled: boolean;
   pinLocked: boolean;
-  setupPin: (pin: string) => void;
+  setupPin: (pin: string) => Promise<void>;
   disablePin: () => void;
-  unlockWithPin: (pin: string) => boolean;
+  unlockWithPin: (pin: string) => Promise<boolean>;
   lockNow: () => void;
   permissions: UserPermissions;
 }
@@ -49,9 +76,9 @@ const AuthContext = createContext<AuthContextType>({
   setSessionTimeoutMins: () => {},
   pinEnabled: false,
   pinLocked: false,
-  setupPin: () => {},
+  setupPin: async () => {},
   disablePin: () => {},
-  unlockWithPin: () => false,
+  unlockWithPin: async () => false,
   lockNow: () => {},
   permissions: DEFAULT_PERMISSIONS['viewer'],
 });
@@ -221,23 +248,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   // ─── PIN ──────────────────────────────────────────────────────────────────
-  const setupPin = (pin: string) => {
-    localStorage.setItem(PIN_KEY, hashPin(pin));
+  const setupPin = async (pin: string) => {
+    const salt = newSalt();
+    localStorage.setItem(PIN_SALT_KEY, saltToB64(salt));
+    localStorage.setItem(PIN_KEY, await hashPin(pin, salt));
     setPinEnabled(true);
     setPinLocked(false);
   };
 
   const disablePin = () => {
+    localStorage.removeItem(PIN_SALT_KEY);
     localStorage.removeItem(PIN_KEY);
     localStorage.removeItem(PIN_LOCK_KEY);
     setPinEnabled(false);
     setPinLocked(false);
   };
 
-  const unlockWithPin = (pin: string): boolean => {
+  const unlockWithPin = async (pin: string): Promise<boolean> => {
     const stored = localStorage.getItem(PIN_KEY);
-    if (!stored) return false;
-    if (hashPin(pin) === stored) {
+    const storedSalt = localStorage.getItem(PIN_SALT_KEY);
+    // A PIN set before this change has no salt and an unverifiable hash.
+    // Clearing it drops the user back to the password screen rather than
+    // locking them out of a device they are holding.
+    if (!stored || !storedSalt) {
+      localStorage.removeItem(PIN_KEY);
+      localStorage.removeItem(PIN_LOCK_KEY);
+      setPinEnabled(false);
+      setPinLocked(false);
+      return false;
+    }
+    if (await hashPin(pin, saltFromB64(storedSalt)) === stored) {
       localStorage.removeItem(PIN_LOCK_KEY);
       setPinLocked(false);
       return true;
