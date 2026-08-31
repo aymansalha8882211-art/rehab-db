@@ -4,6 +4,10 @@ import { db } from './db';
 import { encryptedDb } from './encryptedDb';
 import { loginWithEdgeFunction, setToken, clearToken } from './api';
 import { supabase } from './supabaseClient';
+// Moved to its own module so it can be tested without React or Dexie.
+// Re-exported here because callers already import it from this file.
+import { resolvePermissions } from './permissions';
+export { resolvePermissions };
 
 const TIMEOUT_KEY  = 'rehab-session-timeout';
 const USER_KEY     = 'rehab-current-user';
@@ -19,14 +23,6 @@ function hashPin(pin: string): string {
   return String(h >>> 0);
 }
 
-export function resolvePermissions(user: User | null): UserPermissions {
-  if (!user) return DEFAULT_PERMISSIONS['viewer'];
-  const base = { ...DEFAULT_PERMISSIONS[user.role] };
-  if (user.permissions) {
-    return { ...base, ...user.permissions };
-  }
-  return base;
-}
 
 interface AuthContextType {
   currentUser: User | null;

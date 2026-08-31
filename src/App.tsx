@@ -1,4 +1,4 @@
-import { ComponentType, useEffect, useState, useCallback } from "react";
+import { ComponentType, useEffect, useState, useCallback, lazy, Suspense } from "react";
 import { Switch, Route, Router, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -9,23 +9,31 @@ import { DataProvider } from "@/lib/dataContext";
 import Layout from "@/components/Layout";
 import PinLock from "@/components/PinLock";
 import Login from "@/pages/Login";
-import Dashboard from "@/pages/Dashboard";
-import Search from "@/pages/Search";
-import NewBeneficiary from "@/pages/NewBeneficiary";
-import BeneficiaryProfile from "@/pages/BeneficiaryProfile";
-import AddVisit from "@/pages/AddVisit";
-import Reports from "@/pages/Reports";
-import Alerts from "@/pages/Alerts";
-import Users from "@/pages/Users";
-import Settings from "@/pages/Settings";
-import AuditLog from "@/pages/AuditLog";
-import Referrals from "@/pages/Referrals";
-import Demographics from "@/pages/Demographics";
-import StaffPerformance from "@/pages/StaffPerformance";
 import NotFound from "@/pages/not-found";
 import { Wrench } from "lucide-react";
 import { getMaintenanceStatus } from "@/lib/api";
-import AssessmentForm from '@/pages/AssessmentForm';
+
+
+// Pages load when a route asks for them. Bundled together they were one
+// 561 KB chunk that a data-entry user downloaded in full, reports and
+// charting included, to reach screens their role blocks them from opening.
+const Dashboard = lazy(() => import('@/pages/Dashboard'));
+const Search = lazy(() => import('@/pages/Search'));
+const NewBeneficiary = lazy(() => import('@/pages/NewBeneficiary'));
+const BeneficiaryProfile = lazy(() => import('@/pages/BeneficiaryProfile'));
+const AddVisit = lazy(() => import('@/pages/AddVisit'));
+const Reports = lazy(() => import('@/pages/Reports'));
+const Alerts = lazy(() => import('@/pages/Alerts'));
+const Users = lazy(() => import('@/pages/Users'));
+const Settings = lazy(() => import('@/pages/Settings'));
+const AuditLog = lazy(() => import('@/pages/AuditLog'));
+const Referrals = lazy(() => import('@/pages/Referrals'));
+const Demographics = lazy(() => import('@/pages/Demographics'));
+const StaffPerformance = lazy(() => import('@/pages/StaffPerformance'));
+const AssessmentForm = lazy(() => import('@/pages/AssessmentForm'));
+const SuccessStories = lazy(() => import('@/pages/SuccessStories'));
+const MissedVisits = lazy(() => import('@/pages/MissedVisits'));
+const Import = lazy(() => import('@/pages/Import'));
 
 const queryClient = new QueryClient();
 
@@ -102,6 +110,11 @@ function AppRoutes() {
   if (pinLocked && isAuthenticated) return <PinLock />;
 
   return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
     <Switch>
       <Route path="/">
         {isAuthenticated
@@ -142,9 +155,13 @@ function AppRoutes() {
       <Route path="/staff-performance"><Protected C={StaffPerformance} supervisorPlus /></Route>
       <Route path="/settings"><Protected C={Settings} /></Route>
       <Route path="/assessment/:id"><Protected C={AssessmentForm} /></Route>
+      <Route path="/success-stories"><Protected C={SuccessStories} supervisorPlus /></Route>
+      <Route path="/missed-visits"><Protected C={MissedVisits} /></Route>
+      <Route path="/import"><Protected C={Import} adminOnly /></Route>
       <Route component={NotFound} />
       
     </Switch>
+    </Suspense>
   );
 }
 

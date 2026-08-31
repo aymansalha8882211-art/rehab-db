@@ -29,7 +29,7 @@ import {
   JOB_STATUS, RELATIONSHIPS,
   CBM_SIGNATURE, CHURCH_SIGNATURE,
   CBM_ASSESSMENT_GROUPS_LABELS,
-  SESSION_NUMBERS,
+  SESSION_NUMBERS, getProject
 } from '@/data/mockData';
 
 // ─── Helpers ──────────────────────────────────────────────
@@ -169,7 +169,7 @@ export default function AssessmentForm() {
 
   const beneficiary = beneficiaries.find(b => b.id === beneficiaryId);
   const project = beneficiary?.project || 'CBM';
-  const isCBM = project === 'CBM';
+  const isCBM = getProject(project).forms === 'cbm';
   const canAdd = permissions.canAddSession;
   const userProjects = currentUser?.projects || [];
   const canViewProject = userProjects.length === 0 || userProjects.includes(project as any);

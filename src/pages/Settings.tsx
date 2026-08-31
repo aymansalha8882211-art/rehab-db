@@ -104,6 +104,8 @@ export default function Settings() {
   const handleDarkMode = (v: boolean) => {
     setDarkMode(v);
     document.documentElement.classList.toggle('dark', v);
+    // Without this the toggle worked but forgot itself on the next reload.
+    try { localStorage.setItem('rehab-theme', v ? 'dark' : 'light'); } catch {}
   };
 
   const handleSaveProfile = async () => {

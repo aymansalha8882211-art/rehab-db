@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import {
   LayoutDashboard, Search, BarChart2, Bell, Users, Settings,
   LogOut, Menu, X, Globe, Shield, Eye, Edit2, User, Wifi, WifiOff,
-  ClipboardList, ArrowRightLeft, PieChart, Users2,
+  ClipboardList, ArrowRightLeft, PieChart, Users2, Sparkles, CalendarX2, Upload,
 } from 'lucide-react';
 
 const navItems = [
@@ -17,9 +17,12 @@ const navItems = [
   { path: '/referrals',         labelKey: 'Referrals',         icon: ArrowRightLeft },
   { path: '/demographics',      labelKey: 'Demographics',      icon: PieChart,      supervisorPlus: true },
   { path: '/staff-performance', labelKey: 'Staff Performance', icon: Users2,        supervisorPlus: true },
+  { path: '/missed-visits',     labelKey: 'Missed Visits',     icon: CalendarX2 },
   { path: '/alerts',            labelKey: 'Alerts',            icon: Bell },
+  { path: '/success-stories',   labelKey: 'Success Stories',   icon: Sparkles,      supervisorPlus: true },
   { path: '/users',             labelKey: 'Users',             icon: Users,         adminOnly: true },
   { path: '/audit',             labelKey: 'Audit Log',         icon: ClipboardList, adminOnly: true },
+  { path: '/import',            labelKey: 'Import Data',       icon: Upload,        adminOnly: true },
   { path: '/settings',          labelKey: 'Settings',          icon: Settings },
 ];
 

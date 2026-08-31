@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, CartesianGrid } from 'recharts';
-import { GAZA_AREAS, INJURY_TYPES } from '@/data/mockData';
+import { GAZA_AREAS, INJURY_TYPES, PROJECTS, getProject} from '@/data/mockData';
 import { useToast } from '@/hooks/use-toast';
 import { Download, FileText, Filter, BarChart2, Loader2, Globe } from 'lucide-react';
 
@@ -211,7 +211,7 @@ const improvementRate = sessionsWithResponse > 0
 </tbody></table>
 <h2>قائمة الحالات (${filteredBeneficiaries.length})</h2>
 <table><thead><tr><th>#</th><th>رقم الهوية</th><th>الاسم</th><th>الجنس</th><th>المنطقة</th><th>نوع الإصابة</th><th>المشروع</th><th>الجلسات</th><th>الحالة</th></tr></thead><tbody>
-  ${filteredBeneficiaries.map((b,i)=>{const sc=sessions.filter(s=>s.beneficiaryId===b.id).length;return`<tr><td style="text-align:center">${i+1}</td><td style="font-family:monospace">${b.nationalId}</td><td style="font-weight:600">${b.fullName}</td><td>${b.gender==='male'?'ذكر':'أنثى'}</td><td>${b.residenceArea}</td><td>${b.injuryType}</td><td><span class="badge ${b.project==='CBM'?'badge-cbm':'badge-church'}">${b.project}</span></td><td style="text-align:center;font-weight:700;color:#1a3a6b">${sc}</td><td><span class="badge ${b.caseStatus==='active'?'badge-active':'badge-closed'}">${b.caseStatus==='active'?'نشط':'مغلق'}</span></td></tr>`;}).join('')}
+  ${filteredBeneficiaries.map((b,i)=>{const sc=sessions.filter(s=>s.beneficiaryId===b.id).length;return`<tr><td style="text-align:center">${i+1}</td><td style="font-family:monospace">${b.nationalId}</td><td style="font-weight:600">${b.fullName}</td><td>${b.gender==='male'?'ذكر':'أنثى'}</td><td>${b.residenceArea}</td><td>${b.injuryType}</td><td><span class="badge" style="${getProject(b.project).printStyle}">${getProject(b.project).label}</span></td><td style="text-align:center;font-weight:700;color:#1a3a6b">${sc}</td><td><span class="badge ${b.caseStatus==='active'?'badge-active':'badge-closed'}">${b.caseStatus==='active'?'نشط':'مغلق'}</span></td></tr>`;}).join('')}
 </tbody></table>
 <div class="footer"><span>نظام إدارة حالات إعادة التأهيل — وثيقة سرية للاستخدام الرسمي فقط</span><span>إجمالي: ${filteredBeneficiaries.length} حالة | ${filteredSessions.length} جلسة</span></div>
 </body></html>`;
@@ -229,7 +229,9 @@ const improvementRate = sessionsWithResponse > 0
     const reportPeriod = dateFrom && dateTo
       ? `${dateFrom} — ${dateTo}`
       : dateFrom ? `من ${dateFrom}` : dateTo ? `حتى ${dateTo}` : 'الفترة الكاملة';
-    const projectLabel = projectFilter === 'CBM' ? 'مشروع CBM' : projectFilter === 'Church' ? 'مشروع الكنيسة الإنجيلية' : 'مشروع CBM ومشروع الكنيسة الإنجيلية';
+    const projectLabel = PROJECTS.some(p => p.code === projectFilter)
+      ? `مشروع ${getProject(projectFilter).label}`
+      : PROJECTS.map(p => p.label).join(' · ');
     const avgSessionsPerBeneficiary = filteredBeneficiaries.length > 0
       ? (filteredSessions.length / filteredBeneficiaries.length).toFixed(1)
       : '0';

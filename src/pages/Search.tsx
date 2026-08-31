@@ -9,7 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search as SearchIcon, UserPlus, AlertCircle, Clock, ChevronRight, Filter, X, AlertTriangle, ExternalLink } from 'lucide-react';
-import { GAZA_AREAS } from '@/data/mockData';
+import { GAZA_AREAS, PROJECT_CODES, getProject} from '@/data/mockData';
 
 const PAGE_SIZE = 20;
 
@@ -132,7 +132,7 @@ export default function Search() {
           </div>
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap justify-end">
-          <Badge className={`text-[10px] px-1.5 border-0 ${b.project === 'CBM' ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'}`}>
+          <Badge className={`text-[10px] px-1.5 border-0 ${getProject(b.project).badgeClass}`}>
             {b.project}
           </Badge>
           <Badge className={`text-[10px] px-1.5 border-0 ${statusColors[b.caseStatus]}`}>
@@ -150,7 +150,7 @@ export default function Search() {
   );
 
   const availableProjects = isAdmin || userProjects.length === 0
-    ? ['CBM', 'Church']
+    ? PROJECT_CODES
     : userProjects;
 
   // ─── Pagination Component ─────────────────────────────────────────────────

@@ -15,6 +15,9 @@ const translations = {
     "Alerts": "Alerts",
     "Users": "Users",
     "Audit Log": "Audit Log",
+    "Success Stories": "Success Stories",
+    "Missed Visits": "Missed Visits",
+    "Import Data": "Import Data",
     "Settings": "Settings",
     "Logout": "Logout",
 
@@ -599,6 +602,9 @@ const translations = {
     "Alerts": "التنبيهات",
     "Users": "المستخدمون",
     "Audit Log": "سجل التدقيق",
+    "Success Stories": "قصص النجاح",
+    "Missed Visits": "الزيارات الفائتة",
+    "Import Data": "استيراد البيانات",
     "Settings": "الإعدادات",
     "Logout": "تسجيل الخروج",
 

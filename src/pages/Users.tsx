@@ -11,7 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { User, Role, DEFAULT_PERMISSIONS, UserPermissions, ROLE_LABELS } from '@/data/mockData';
+import { User, Role, DEFAULT_PERMISSIONS, UserPermissions, ROLE_LABELS, PROJECTS
+} from '@/data/mockData';
 import { useToast } from '@/hooks/use-toast';
 import { UserPlus, Pencil, Shield, Eye, Edit2, User as UserIcon, Settings2, Trash2, Send, Copy, AlertTriangle } from 'lucide-react';
 
@@ -332,10 +333,10 @@ export default function Users() {
               <div className="space-y-2">
                 <Label className="text-sm">المشاريع المسموح بها</Label>
                 <div className="flex gap-4">
-                  {['CBM', 'Church'].map(proj => (
-                    <div key={proj} className="flex items-center gap-2">
-                      <Checkbox id={proj} checked={form.projects.includes(proj)} onCheckedChange={() => toggleProject(proj)} />
-                      <Label htmlFor={proj} className="text-sm cursor-pointer">{proj}</Label>
+                  {PROJECTS.map(p => (
+                    <div key={p.code} className="flex items-center gap-2">
+                      <Checkbox id={p.code} checked={form.projects.includes(p.code)} onCheckedChange={() => toggleProject(p.code)} />
+                      <Label htmlFor={p.code} className="text-sm cursor-pointer">{p.label}</Label>
                     </div>
                   ))}
                 </div>

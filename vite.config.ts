@@ -17,8 +17,22 @@ export default defineConfig({
       registerType: "autoUpdate",
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff,woff2}"],
+        // Excel and charting are a third of the payload and are only reached
+        // from reporting screens. Field staff recording sessions never open
+        // them, so they are fetched on first use instead of being pushed to
+        // every phone up front -- and cached once fetched, so a supervisor who
+        // has opened reports once still has them offline.
+        globIgnores: ["**/vendor-xlsx-*.js", "**/vendor-charts-*.js"],
+        runtimeCaching: [{
+          urlPattern: /\/assets\/vendor-(xlsx|charts)-.*\.js$/,
+          handler: "CacheFirst",
+          options: { cacheName: "heavy-vendor", expiration: { maxEntries: 8 } },
+        }],
         cleanupOutdatedCaches: true,
-        navigateFallback: null,
+        // A SPA route has no file of its own, so without a fallback every
+        // deep link failed offline even though the whole app was cached.
+        navigateFallback: "index.html",
+        navigateFallbackDenylist: [/^\/api\//],
       },
       manifest: {
         name: "قاعدة بيانات التأهيل",

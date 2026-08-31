@@ -1,0 +1,37 @@
+name: CI
+
+# Runs on every push and pull request. Before this the repository had no
+# automated checks at all: typecheck was broken and never invoked, and there
+# were no tests, so a change that did not compile could reach production and
+# only fail once someone opened the page.
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      # Not a gate yet. The project carries 32 pre-existing type errors, so
+      # failing on them would block every pull request from day one. This
+      # records the count so the number can be driven down deliberately
+      # instead of drifting upward unnoticed.
+      - name: Typecheck (reported, not enforced)
+        continue-on-error: true
+        run: npm run typecheck
